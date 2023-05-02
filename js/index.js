@@ -1,108 +1,107 @@
-import { DBManager } from './DBManager.js';
+
+let listProducts = [];
 
 const carritoMapJSON = sessionStorage.getItem("carritoMap")
 var carritoMap = new Map(JSON.parse(carritoMapJSON))
 console.log(carritoMap)
+
+var username = sessionStorage.getItem("username")
 var carro = document.getElementById("carrito")
 var elementos = document.getElementById("contador-elem")
 var nelem = parseInt(elementos.innerHTML)
 var nelemcar = document.getElementById("nelem")
 
-let listProducts = [];
-var username = sessionStorage.getItem("username")
-document.getElementById("usernameSpan").innerHTML = username;
-const db = new DBManager();
-db.init();
-if(await db.getPhone(username) !== ""){
-    document.getElementById("telephoneSpan").innerHTML = await db.getPhone(username);
-}else{
-    document.getElementById("telephoneSpan").innerHTML = 'No se ha introducido un teléfono';
-}
-if(await db.getEmail(username) !== ""){
-    document.getElementById("emailSpan").innerHTML = await db.getEmail(username);
-}else{
-    document.getElementById("emailSpan").innerHTML = 'No se ha introducido un email';
-}
-
-console.log(db.getEmail(username))
-console.log(db.getPhone(username))
+let tituloHTML = "";
 
 
+
+
+//SOLO PRUEBA
+//const array = [1,2,2,4]
+//
+
+// Función para cargar los libros desde un archivo JSON
 async function fetchBooks() {
-    try {
-      const response = await fetch('libros.json');
-      const data = await response.json();
-      listProducts = data.books;
-      getOrders(username, listProducts);
-      cargarLibrosInicial()
-    } catch (error) {
-      console.log(error);
-    }
+  try {
+    const response = await fetch('libros.json');
+    const data = await response.json();
+    listProducts = data.books;
+    cargarLibrosInicial()
+    renderBooks();
+  } catch (error) {
+    console.log(error);
   }
+}
 
-
-
-async function getOrders(username, listProducts){
-    const pedidos = await db.getUserOrders(username);
-
-     // Inicializar una lista vacía para almacenar los pedidos
-    const orders = [];
-
-    // Para cada IBAN del usuario, obtener los pedidos correspondientes
-    for (const id of pedidos) {
-        const matchingOrders = await db.getEspecificOrder(id);
-
-        // Agregar los pedidos a la lista de pedidos
-        orders.push(...matchingOrders);
+//Si presiona enter tb busca
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    // Si se presiona la tecla Enter, llama a la función searchBooks
+    event.preventDefault();
+    searchBooks();
   }
-  console.log(pedidos)
-  console.log(orders)
+});
 
-  let filteredBooks = [];
-
-  orders.forEach((order) => {
-    const matchedBook = listProducts.find((book) => book.id == order);
-    if (matchedBook) {
-      filteredBooks.push(matchedBook);
-    }
- });
-  console.log(filteredBooks);
+// Función para buscar los libros según el título o autor
+function searchBooks() {
+  tituloHTML=""
+  const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  if(searchQuery!==""){
+    tituloHTML += `<h3>Resultados de búsqueda para "${searchQuery}"</h3><br>`;
+  }
+  const filteredBooks = listProducts.filter((book) => {
+    return book.titulo.toLowerCase().includes(searchQuery) || book.autor.toLowerCase().includes(searchQuery);
+  });
   renderBooks(filteredBooks);
+}
+
+// Función para renderizar los libros
+function renderBooks(books = listProducts) {
+  let librosHTML = "";
+  librosHTML += tituloHTML
+  librosHTML += `\n`
+
+  if (books.length === 0) {
+    librosHTML = "<p>No se han encontrado libros para su búsqueda</p>";
+  } else {
+    books.forEach(libro => {
+      librosHTML += `
+          <div class="col d-flex" id="${libro.id}">
+            <div class="card flex-fill">
+              <a href="pagLibro.html?id=${libro.id}">
+                <img src="${libro.portada}" class="card-img-top" alt="...">
+              </a>
+              <div class="card-body">
+                <h5 class="card-title">${libro.titulo}</h5>
+                <p class="card-subtitle text-muted mb-2">${libro.autor}</p>
+                <h4 class="card-text mb-0">${libro.precio}€</h4>
+              </div>
+              <div class="card-footer">
+                <a onclick="cargaLibro(document.getElementById('${libro.id}'))" class="btn btn-dark">Añadir al carrito</a>
+              </div>
+            </div>
+          </div>
+        `;
+    });
+  }
+  document.getElementById("countResults").innerHTML = librosHTML;
 }
 
 // Cargar los libros al cargar la página
 fetchBooks();
 
-// Función para renderizar los libros
-function renderBooks(books = listProducts) {
-    let librosHTML = "";
-    if(books !== null){
-        document.getElementById("titulo").innerHTML = '<h3 class="m-3 d-flex justify-content-center">Libros que has comprado recientemente</h3>';
-    }
-    books.forEach(libro => {
-      librosHTML += `
-      <div class="col-sm-3 mt-2">
-        <div class="card p-3" id="${libro.id}">
-                <div class="d-flex justify-content-center">
-                    <a href="pagLibro.html?id=${libro.id}">
-                    <img src="${libro.portada}" class="card-img-top" alt="...">
-                    </a>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title d-flex justify-content-center">${libro.titulo}</h5>
-                    <p class="card-subtitle text-muted mb-2 d-flex justify-content-center">${libro.autor}</p>
-                    <h4 class="card-text mb-3 d-flex justify-content-center">${libro.precio}€</h4>
-            </div>
-        </div>
-    </div>
-      `;
-    });
-    document.getElementById("historial").innerHTML = librosHTML;
-  }
+// Agregar un evento al botón de búsqueda para activar la función searchBooks
+document.getElementById("busca").addEventListener("click", searchBooks);
 
-  // Función para buscar los libros según el título o autor
+function redirectToCategory(category) {
+  window.location.href = `categorias.html?category=${category}`;
+}
 
-  //Carga los libros desde un array de ids
+
+
+//Por cuestiones de errores con la carga de libros del json he metido las operaciones del carrito aqui
+
+//Carga los libros desde un array de ids
 function cargarLibrosInicial() {
   console.log("llega cargar")
   var igual = false
@@ -114,6 +113,51 @@ function cargarLibrosInicial() {
   }
 }
 
+//Le llega un div de libro, le saca la id y lo manda a añadir
+function cargaLibro(libroIdDiv) {
+  var libroId = libroIdDiv.id
+  var libro = listProducts.find(function (book) {
+    return book.id == libroId
+  })
+  var cantidad = 0
+
+  if (carritoMap.size == 0) {
+    cantidad = 1
+    carritoMap.set(libro.id, cantidad)
+    console.log("PRIMERO")
+  } else {
+    var igual = false
+    for (let [id, cant] of carritoMap.entries()) {
+      if (libro.id === id) {
+        cantidad = cant + 1
+        carritoMap.set(libro.id, cantidad)
+        igual = true
+        console.log("IGUALES")
+      }
+    }
+    if (igual == false) {
+      cantidad = 1
+      console.log("DISTINTOS")
+      carritoMap.set(libro.id, cantidad)
+    }
+
+  }
+  console.log(carritoMap)
+
+  //Guarda el libro en un JSON para almacenar el carrito entre pestañas
+  const carritoMapJSON = JSON.stringify(Array.from(carritoMap.entries()))
+  sessionStorage.setItem("carritoMap", carritoMapJSON)
+  console.log(carritoMapJSON)
+
+  addLibro(libro, cantidad, igual)
+
+  turnGreen(libroIdDiv)
+  setTimeout(() => {
+    returnNormal(libroIdDiv)
+  }, 1000);
+}
+
+//Añade el libro al carrito (le llega un objeto Libro del JSON)
 function addLibro(libroElegido, cant, igual) {
   const miLibro = libroElegido
 
@@ -233,7 +277,6 @@ function addLibro(libroElegido, cant, igual) {
     cantidad.innerHTML = "Cant.: " + cant
 
     //Elimina el elemento seleccionado del array
-    var nf = true
     for (let [id, cant] of carritoMap) {
       console.log(id)
       if (id == miLibro.id) {
@@ -244,7 +287,6 @@ function addLibro(libroElegido, cant, igual) {
           cant--
           carritoMap.set(id, cant)
         }
-        nf = false
       }
     }
     const carritoArrayJSON = JSON.stringify(Array.from(carritoMap.entries()))
@@ -252,6 +294,23 @@ function addLibro(libroElegido, cant, igual) {
     console.log(carritoArrayJSON)
   }
 
+}
+
+
+
+
+function turnGreen(libro) {
+  var miLibro = libro
+  var boton = miLibro.querySelector('div').querySelectorAll('div')[1].querySelector('a')
+  boton.className = "btn btn-success"
+  boton.innerHTML = "¡Añadido al carrito!"
+}
+
+function returnNormal(libro) {
+  var miLibro = libro
+  var boton = miLibro.querySelector('div').querySelectorAll('div')[1].querySelector('a')
+  boton.className = "btn btn-dark"
+  boton.innerHTML = "Añadir al carrito"
 }
 
 function sumarPrecio(precio) {
@@ -285,3 +344,4 @@ function restarPrecio(precio) {
 
   document.getElementById("total").innerHTML = pFinalStr
 }
+
