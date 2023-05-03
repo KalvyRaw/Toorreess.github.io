@@ -1,14 +1,14 @@
 let listaProductos = [];
-const carritoMapJSON = sessionStorage.getItem("carritoMap")
+var carritoMapJSON = sessionStorage.getItem("carritoMap")
 var carritoMap = new Map(JSON.parse(carritoMapJSON))
 console.log(carritoMap)
 let pedidoHTML = "";
-
+let totalHTML = ""
 
 //Carga los libros desde un array de ids
 function cargarLibrosInicial() {
   console.log("ahi vamos")
-  let total=0;
+  let total = 0;
   for (let [id, cant] of carritoMap) {
     var libro = listaProductos.find(function (book) {
       return book.id == id
@@ -17,7 +17,7 @@ function cargarLibrosInicial() {
     console.log(libro.precio)
     console.log(total)
 
-    total += (parseFloat((libro.precio).replace(",",".")))*cant;
+    total += (parseFloat((libro.precio).replace(",", "."))) * cant;
   }
   renderTotal(total)
 }
@@ -26,8 +26,8 @@ function cargarLibrosInicial() {
 
 // Función para renderizar el pedido
 function renderOrder(libro, cant) {
-  
-    pedidoHTML += `
+
+  pedidoHTML += `
       <div class="row">
       <div class="card bg-light id="${libro.id}">
       <div class="card-body d-flex justify-content-between align-items-center">
@@ -46,19 +46,20 @@ function renderOrder(libro, cant) {
 
 // Función para renderizar el total
 function renderTotal(total) {
-  
-  pedidoHTML += `
+
+  totalHTML += `
   <div class="container p-3 border-top">
   <div class="card bg-light">
   <div class="card-body d-flex justify-content-between">
     <h5 class="card-title">Total (EUR)</h5>
-    <h5 class="card-text">${((total).toFixed(2)).replace(".",",")}€</h5>
+    <h5 class="card-text">${((total).toFixed(2)).replace(".", ",")}€</h5>
   </div>
 </div>
 </div>
   `;
-document.getElementById("total").innerHTML = pedidoHTML;
+  document.getElementById("total").innerHTML = totalHTML;
 }
+
 async function fetchBooks() {
   try {
     const response = await fetch('libros.json');
@@ -70,3 +71,10 @@ async function fetchBooks() {
   }
 }
 fetchBooks()
+
+function cleanCarrito(){
+    carritoMap = new Map()
+    carritoMapJSON = JSON.stringify(Array.from(carritoMap.entries()))
+    sessionStorage.setItem("carritoMap", carritoMapJSON)
+    console.log(carritoMapJSON)
+}

@@ -50,6 +50,7 @@ export class DBManager {
 					ordersList: [],
 					email: email,
 					phoneNumber: phoneNumber,
+					cart:{}
 				});
 			result = 1;
 		} catch (e) {
