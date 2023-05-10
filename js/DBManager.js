@@ -194,7 +194,7 @@ export class DBManager {
 	async addNewOrder(books){
 		let result = 0;
 		const timestamp = new Date();
-		const ordersCollection = collection(db, "orders");
+		const ordersCollection = collection(DBManager.BD, "orders");
 		try{
 			const newOrder = await addDoc(ordersCollection, {
 				booksId: books,
@@ -205,6 +205,7 @@ export class DBManager {
 			console.log("Error añadiendo pedido a la base de datos: ", e)
 		}
 		console.log(`Doc created with ID ${newOrder.id}`);
+		return newOrder.id;
 	}
 
 	/**
