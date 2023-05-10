@@ -50,7 +50,6 @@ export class DBManager {
 					ordersList: [],
 					email: email,
 					phoneNumber: phoneNumber,
-					cart:{}
 				});
 			result = 1;
 		} catch (e) {
@@ -103,7 +102,7 @@ export class DBManager {
 		let result = -1;
 
 		if(docSnap.exists()){
-			result = await docSnap.get("orders");
+			result = await docSnap.get("ordersList");
 		}
 		return result;
 	}
