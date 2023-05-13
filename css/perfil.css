@@ -57,8 +57,8 @@
 }
 
 #fechaContainer {
-  text-align: center; /* Centra el contenido horizontalmente */
-  margin-bottom: 20px; / Agrega un margen inferior para separar del contenido anterior */
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .fechaPedidos {
