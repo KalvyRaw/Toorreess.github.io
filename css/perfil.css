@@ -57,7 +57,7 @@
 }
 
 #fechaContainer {
-  text-align: center; /* Centra el contenido horizontalmente /
+  text-align: center; /* Centra el contenido horizontalmente */
   margin-bottom: 20px; / Agrega un margen inferior para separar del contenido anterior */
 }
 
@@ -72,5 +72,5 @@
   text-shadow: 2px 2px #fff;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   border-radius: 10px; 
-  margin-bottom: 10px;
+  margin-bottom: -10px;
 }
