@@ -29,6 +29,15 @@ if (category == 'Fantasia') {
   pagina.innerHTML = "Cómics"
 }
 
+function carritoNoPermitePagoVacio(){
+  if(carritoMap.size===0){
+    document.getElementById("btnpago").style.display = 'none';
+  }else{
+    document.getElementById("btnpago").style.display = 'block';
+  }
+}
+carritoNoPermitePagoVacio();
+
 // Función para cargar los libros desde un archivo JSON
 async function fetchBooks() {
   try {
@@ -62,6 +71,7 @@ function searchBooks() {
     return (book.titulo.toLowerCase().includes(searchQuery) || book.autor.toLowerCase().includes(searchQuery)) && book.categoria === category;
   });
   renderBooks(filteredBooks);
+  return false; 
 }
 
 function searchCategory() {
@@ -91,7 +101,7 @@ function renderBooks(books = listProducts) {
                 <h4 class="card-text mb-0">${libro.precio}€</h4>
               </div>
               <div class="card-footer">
-                <a onclick="cargaLibro(document.getElementById('${libro.id}'))" class="btn btn-dark">Añadir al carrito</a>
+                <a onclick="cargaLibro(document.getElementById('${libro.id}')); carritoNoPermitePagoVacio()" class="btn btn-dark">Añadir al carrito</a>
               </div>
             </div>
           </div>
@@ -250,6 +260,7 @@ function addLibro(libroElegido, cant, igual) {
     eliminar.innerHTML = "Eliminar"
     newCol2.append(eliminar)
     eliminar.addEventListener("click", removeLibro, false)
+    eliminar.addEventListener("click", carritoNoPermitePagoVacio, false)
 
     var newCol3 = document.createElement("div")
     newCol3.className = "col-sm"
@@ -357,3 +368,4 @@ function restarPrecio(precio) {
 
   document.getElementById("total").innerHTML = pFinalStr
 }
+

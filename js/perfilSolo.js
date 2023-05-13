@@ -24,6 +24,13 @@ if(await db.getEmail(username) !== ""){
     document.getElementById("emailSpan").innerHTML = 'No se ha introducido un email';
 }
 
+var botonCerrar = document.getElementById("cerrar");
+
+botonCerrar.addEventListener("click", function() {
+  sessionStorage.clear()
+  window.location.href = "index.html";
+});
+
 console.log(db.getEmail(username))
 console.log(db.getPhone(username))
 
@@ -41,61 +48,82 @@ async function fetchBooks() {
   }
 
 
-
+  let librosHTML = "";
 async function getOrders(username, listProducts){
     const pedidos = await db.getUserOrders(username);
 
      // Inicializar una lista vacía para almacenar los pedidos
-    const orders = [];
-
+    var orders = [];
+    var fechas=[];
     // Para cada IBAN del usuario, obtener los pedidos correspondientes
     for (const id of pedidos) {
         const matchingOrders = await db.getEspecificOrder(id);
-
+        const fechasPedidos = await db.getEspecificTimestamp(id);
         // Agregar los pedidos a la lista de pedidos
         orders.push(...matchingOrders);
+        
+        console.log(orders);
+        console.log(fechasPedidos);
+        console.log(fechas);
+
+        let filteredBooks = [];
+
+        orders.forEach((order) => {
+          const matchedBook = listProducts.find((book) => book.id == order);
+          if (matchedBook) {
+            filteredBooks.push(matchedBook);
+          }
+        });
+
+        console.log(filteredBooks);
+        librosHTML += `
+        <div class="d-flex justify-content-center">
+          <div id="fechaContainer">
+            <h3 class="fechaPedidos">${fechasPedidos}</h3>
+          </div>
+        </div>
+        <div class = "container">
+          <div class="row d-flex justify-content-center">        
+        `;
+        renderBooks(filteredBooks);
+        librosHTML += '</div></div>'
+        orders = [];
+
   }
-  console.log(pedidos)
-  console.log(orders)
-
-  let filteredBooks = [];
-
-  orders.forEach((order) => {
-    const matchedBook = listProducts.find((book) => book.id == order);
-    if (matchedBook) {
-      filteredBooks.push(matchedBook);
-    }
- });
-  console.log(filteredBooks);
-  renderBooks(filteredBooks);
+  console.log(pedidos) // los pedidos
+  console.log(orders)  // los ids de los libros, ya todos juntos
 }
 
 // Cargar los libros al cargar la página
 fetchBooks();
 
 // Función para renderizar los libros
-function renderBooks(books = listProducts) {
-    let librosHTML = "";
+ function  renderBooks(books = listProducts) {
+    
     if(books !== null){
-        document.getElementById("titulo").innerHTML = '<h3 class="m-3 d-flex justify-content-center">Libros que has comprado recientemente</h3>';
+        document.getElementById("titulo").innerHTML = '<h3 class="m-3 d-flex justify-content-center">Mi historial de pedidos</h3>';
     }
     books.forEach(libro => {
-      librosHTML += `
-      <div class="col-sm-3 mt-2">
-        <div class="card p-3" id="${libro.id}">
-                <div class="d-flex justify-content-center">
-                    <a href="pagLibro.html?id=${libro.id}">
-                    <img src="${libro.portada}" class="card-img-top" alt="Libro: ${libro.titulo}">
-                    </a>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title d-flex justify-content-center">${libro.titulo}</h5>
-                    <p class="card-subtitle text-muted mb-2 d-flex justify-content-center">${libro.autor}</p>
-                    <h4 class="card-text mb-3 d-flex justify-content-center">${libro.precio}€</h4>
-            </div>
-        </div>
+     
+        librosHTML += `
+        <div class="col-sm-2 mt-2 m-3">
+  <div class="card p-3 h-100" id="${libro.id}">
+    <div class="d-flex justify-content-center">
+      <a href="pagLibro.html?id=${libro.id}">
+        <img src="${libro.portada}" class="card-img-top" alt="Libro: ${libro.titulo}">
+      </a>
     </div>
-      `;
+    <div class="card-body">
+      <h5 class="card-title d-flex justify-content-center">${libro.titulo}</h5>
+      <p class="card-subtitle text-muted mb-2 d-flex justify-content-center">${libro.autor}</p>
+      <h4 class="card-text mb-3 d-flex justify-content-center">${libro.precio}€</h4>
+    </div>
+  </div>
+</div>
+
+        `;
+        
+      
     });
     document.getElementById("historial").innerHTML = librosHTML;
   }
@@ -193,6 +221,7 @@ function addLibro(libroElegido, cant, igual) {
     eliminar.innerHTML = "Eliminar"
     newCol2.append(eliminar)
     eliminar.addEventListener("click", removeLibro, false)
+    eliminar.addEventListener("click", carritoNoPermitePagoVacio, false)
 
     var newCol3 = document.createElement("div")
     newCol3.className = "col-sm"
@@ -285,3 +314,12 @@ function restarPrecio(precio) {
 
   document.getElementById("total").innerHTML = pFinalStr
 }
+
+function carritoNoPermitePagoVacio(){
+  if(carritoMap.size===0){
+    document.getElementById("btnpago").style.display = 'none';
+  }else{
+    document.getElementById("btnpago").style.display = 'block';
+  }
+}
+carritoNoPermitePagoVacio();
