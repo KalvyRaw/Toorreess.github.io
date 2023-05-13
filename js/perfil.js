@@ -19,4 +19,14 @@ if(loged){
 function redirectToCategory(category) {
     window.location.href = `categorias.html?category=${category}`;
   }
+function redirectSearch() {
+  const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  console.log(searchQuery)
+
+  var param = encodeURIComponent(searchQuery);
+
+  window.location.href = 'index.html?busqueda=' + param;
+}
+
+window.redirectSearch = redirectSearch;
 
