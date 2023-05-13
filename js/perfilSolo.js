@@ -34,6 +34,16 @@ botonCerrar.addEventListener("click", function() {
 console.log(db.getEmail(username))
 console.log(db.getPhone(username))
 
+function redirectSearch() {
+  const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  console.log(searchQuery)
+
+  var param = encodeURIComponent(searchQuery);
+
+  window.location.href = 'index.html?busqueda=' + param;
+}
+
+window.redirectSearch = redirectSearch;
 
 async function fetchBooks() {
     try {
